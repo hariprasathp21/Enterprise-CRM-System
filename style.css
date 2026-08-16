@@ -1,0 +1,12 @@
+/* Custom styles to complement Tailwind CSS */
+body {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+aside nav button {
+    cursor: pointer;
+}
+
+.modal-active {
+    display: flex !important;
+}

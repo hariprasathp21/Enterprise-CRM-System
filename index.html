@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise CRM System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS File -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800">
+        <div>
+            <div class="p-6 flex items-center space-x-3 border-b border-slate-800">
+                <i class="fa-solid fa-cube text-indigo-400 text-2xl"></i>
+                <span class="text-xl font-bold text-white tracking-wide">Codec Project CRM</span>
+            </div>
+            <nav class="p-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium bg-indigo-600 text-white transition">
+                    <i class="fa-solid fa-chart-pie w-5"></i><span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('pipeline')" id="nav-pipeline" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+                    <i class="fa-solid fa-kanban w-5"></i><span>Pipeline Board</span>
+                </button>
+                <button onclick="switchTab('leads')" id="nav-leads" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+                    <i class="fa-solid fa-users w-5"></i><span>Leads Directory</span>
+                </button>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500">
+            Tech Stack: React / Node / MongoDB / REST APIs
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+            <h1 id="page-title" class="text-xl font-bold text-gray-800">Sales Performance Dashboard</h1>
+            <button onclick="openModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm transition flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i><span>New Lead / Deal</span>
+            </button>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 bg-gray-50">
+            <!-- DASHBOARD VIEW -->
+            <section id="view-dashboard" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                        <p class="text-sm font-medium text-gray-500">Total Pipeline Value</p>
+                        <h3 id="metric-pipeline-value" class="text-2xl font-bold text-gray-900 mt-1">$0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                        <p class="text-sm font-medium text-gray-500">Won Revenue</p>
+                        <h3 id="metric-won-revenue" class="text-2xl font-bold text-emerald-600 mt-1">$0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                        <p class="text-sm font-medium text-gray-500">Active Deals</p>
+                        <h3 id="metric-active-deals" class="text-2xl font-bold text-gray-900 mt-1">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                        <p class="text-sm font-medium text-gray-500">Win Rate</p>
+                        <h3 id="metric-win-rate" class="text-2xl font-bold text-purple-600 mt-1">0%</h3>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs"><canvas id="pipelineChart"></canvas></div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs"><canvas id="statusChart"></canvas></div>
+                </div>
+            </section>
+
+            <!-- PIPELINE VIEW -->
+            <section id="view-pipeline" class="hidden h-full flex flex-col">
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-4 h-full overflow-x-auto pb-4" id="kanban-board"></div>
+            </section>
+
+            <!-- LEADS VIEW -->
+            <section id="view-leads" class="hidden space-y-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 bg-gray-50"><input type="text" id="lead-search" onkeyup="filterLeads()" placeholder="Search deals..." class="w-80 px-4 py-2 border rounded-lg text-sm"></div>
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-gray-100 text-gray-600 text-xs font-semibold uppercase border-b"><th class="p-4">Deal / Company</th><th class="p-4">Email</th><th class="p-4">Value</th><th class="p-4">Stage</th><th class="p-4 text-right">Actions</th></tr></thead>
+                        <tbody id="leads-table-body" class="divide-y divide-gray-200 text-sm"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="deal-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <h3 id="modal-title" class="font-bold text-lg">Add Deal</h3>
+            <form id="deal-form" onsubmit="saveDeal(event)" class="space-y-3">
+                <input type="hidden" id="deal-id">
+                <input type="text" id="form-title" required placeholder="Deal Title" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="form-company" required placeholder="Company Name" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="email" id="form-email" required placeholder="Contact Email" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="number" id="form-value" required placeholder="Value ($)" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <select id="form-stage" class="w-full px-3 py-2 border rounded-lg text-sm"><option value="Lead">Lead</option><option value="Contacted">Contacted</option><option value="Proposal">Proposal</option><option value="Negotiation">Negotiation</option><option value="Won">Won</option><option value="Lost">Lost</option></select>
+                <input type="text" id="form-owner" required value="Sarah Jenkins" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div class="flex justify-end space-x-2 pt-2"><button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancel</button><button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">Save</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
